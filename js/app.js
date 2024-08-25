@@ -1,5 +1,7 @@
 window.onload = ()=>{
 	const fetch_the_products = async (start_from=0) => {
+		const products_per_batch = 12;
+		
 		start_from = parseInt(start_from);
 		if (start_from==0) {
 			document.getElementById('the_range_products').innerHTML='';
@@ -47,7 +49,7 @@ window.onload = ()=>{
 		ther_loadmore_button_dom.style.opacity = the_json.next_batch_count==0 ? '25%' : '100%';
 		ther_loadmore_button_dom.disabled = the_json.next_batch_count==0; //disable the Load More button if there are no more products
 		if (the_json.next_batch_count > 0)
-		document.getElementById('start_fromm').value=start_from+12; //prepare the start_fromm for the next load if any
+		document.getElementById('start_fromm').value=start_from+products_per_batch; //prepare the start_fromm for the next load if any
 	
 		build_products_html(the_json.product_arr);
 	};

@@ -4,6 +4,7 @@ ini_set('display_errors',1);
 class Products {
 	private static $instance;
 	private static $mysqli_conn;
+	const PRODUCTS_PER_BATCH = 12;
 	
 	public function __construct() {
 	}
@@ -31,15 +32,15 @@ class Products {
 				break;
 			}
 		}
-		$res = self::get_mysqli_conn()->prepare("SELECT name,price,was_price,reviews,img FROM products".($order_by ? ' ORDER BY '.$order_by : '')." LIMIT ?,12");
+		$res = self::get_mysqli_conn()->prepare("SELECT name,price,was_price,reviews,img FROM products".($order_by ? ' ORDER BY '.$order_by : '')." LIMIT ?,".self::PRODUCTS_PER_BATCH);
 		$res->bind_param("i", $obj->start_from);
 		$res->execute();
 		$products = $res->get_result()->fetch_all(MYSQLI_ASSOC);
 		$next_batch_count = 0;
-		if (count($products)==12) {
+		if (count($products)==self::PRODUCTS_PER_BATCH) {
 			$res = self::get_mysqli_conn()->prepare("SELECT COUNT(product_id) as countt FROM products");
 			$res->execute();
-			$next_batch_count=($next_batch_count=($res->get_result()->fetch_column() - $obj->start_from)) > 12 ? 12 : ($next_batch_count < 0 ? 0 : $next_batch_count);
+			$next_batch_count=($next_batch_count=($res->get_result()->fetch_column() - $obj->start_from)) > self::PRODUCTS_PER_BATCH ? self::PRODUCTS_PER_BATCH : ($next_batch_count < 0 ? 0 : $next_batch_count);
 		}
 		$res->close();
 		die(json_encode(['next_batch_count'=>$next_batch_count,'product_arr'=>$products]));
@@ -80,7 +81,7 @@ class Products {
 			$result=$prepared->execute();
 			if($result==false) die('execute failed - '.$i);
 			$prepared->close();
-			if ($img_id==12) $img_id=0;
+			if ($img_id==self::PRODUCTS_PER_BATCH) $img_id=0;
 		}
 		$mysqli->close();
 		die('done');
