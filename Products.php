@@ -41,6 +41,7 @@ class Products {
 			$res->execute();
 			$next_batch_count=($next_batch_count=($res->get_result()->fetch_column() - $obj->start_from)) > 12 ? 12 : ($next_batch_count < 0 ? 0 : $next_batch_count);
 		}
+		$res->close();
 		die(json_encode(['next_batch_count'=>$next_batch_count,'product_arr'=>$products]));
 	}
 	
